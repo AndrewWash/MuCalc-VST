@@ -117,7 +117,7 @@ void DivisionTableComponent::paint (juce::Graphics& g)
     const auto bg     = lf.findColour (juce::ResizableWindow::backgroundColourId);
     const auto fg     = lf.findColour (juce::Label::textColourId);
     const auto faint  = fg.withAlpha (0.45f);
-    const auto accent = juce::Colour (0xff_ad_d8_e6);
+    const auto accent = juce::Colour (0xffadd8e6);
 
     g.fillAll (bg);
 

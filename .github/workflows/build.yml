@@ -2,7 +2,6 @@ name: build
 
 on:
   push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -48,12 +47,55 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel
 
+      - name: Stage artifacts
+        shell: bash
+        run: |
+          mkdir -p staging
+          if [ -d "build/MuCalc_artefacts/Release/VST3" ]; then
+            cp -R "build/MuCalc_artefacts/Release/VST3" staging/
+          fi
+          if [ -d "build/MuCalc_artefacts/Release/CLAP" ]; then
+            cp -R "build/MuCalc_artefacts/Release/CLAP" staging/
+          fi
+          if [ -d "build/MuCalc_artefacts/Release/AU" ]; then
+            cp -R "build/MuCalc_artefacts/Release/AU" staging/
+          fi
+          ls -la staging/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MuCalc-${{ runner.os }}
-          path: |
-            build/MuCalc_artefacts/Release/**/*.vst3
-            build/MuCalc_artefacts/Release/**/*.clap
-            build/MuCalc_artefacts/Release/**/*.component
+          path: staging/
           if-no-files-found: warn
+
+  release:
+    name: Publish GitHub release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Package per platform
+        run: |
+          set -e
+          mkdir -p release
+          cd artifacts
+          for d in */; do
+            name="${d%/}"
+            (cd "$d" && zip -r "../../release/${name}-${GITHUB_REF_NAME}.zip" .)
+          done
+          ls -la ../release/
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true

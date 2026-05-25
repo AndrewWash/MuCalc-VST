@@ -24,6 +24,11 @@ MuCalcEditor::MuCalcEditor (MuCalcProcessor& p)
 
     addAndMakeVisible (syncButton);
 
+    addAndMakeVisible (hostBpmLabel);
+    hostBpmLabel.setJustificationType (juce::Justification::centredRight);
+    hostBpmLabel.setFont (juce::Font (juce::FontOptions (12.0f)));
+    hostBpmLabel.setColour (juce::Label::textColourId, juce::Colours::lightgrey);
+
     addAndMakeVisible (displayLabel);
     displayLabel.setText ("Show as", juce::dontSendNotification);
     displayLabel.setJustificationType (juce::Justification::centredLeft);
@@ -68,6 +73,11 @@ void MuCalcEditor::updateBpmDisplay()
     bpmReadout.setText (usingHost ? "Following host" : "Manual",
                         juce::dontSendNotification);
 
+    hostBpmLabel.setText (processor.hasHostBpm()
+                            ? "Host: " + juce::String (processor.getHostBpm(), 2) + " BPM"
+                            : "Host: \xe2\x80\x94",
+                          juce::dontSendNotification);
+
     const int modeIdx = (int) processor.apvts.getRawParameterValue ("displayMode")->load();
     table.setDisplayMode (static_cast<MuCalc::DisplayMode> (modeIdx));
 
@@ -95,7 +105,9 @@ void MuCalcEditor::resized()
     bpmSlider.setBounds  (topRow);
 
     area.removeFromTop (6);
-    syncButton.setBounds (area.removeFromTop (24));
+    auto syncRow = area.removeFromTop (24);
+    hostBpmLabel.setBounds (syncRow.removeFromRight (140));
+    syncButton.setBounds   (syncRow);
 
     area.removeFromTop (6);
     auto displayRow = area.removeFromTop (26);
