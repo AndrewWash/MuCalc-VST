@@ -24,6 +24,7 @@ private:
     juce::Slider  bpmSlider;
     juce::Label   bpmReadout;
     juce::ToggleButton syncButton { "Sync to host tempo" };
+    juce::Label   hostBpmLabel;
     juce::Label   displayLabel;
     juce::ComboBox displayCombo;
     juce::Label   hintLabel;

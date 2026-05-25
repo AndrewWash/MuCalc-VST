@@ -38,6 +38,9 @@ public:
     double getCurrentSampleRate() const noexcept { return currentSampleRate.load(); }
     bool   isUsingHostBpm() const noexcept;
 
+    double getHostBpm() const noexcept { return hostBpm.load (std::memory_order_relaxed); }
+    bool   hasHostBpm() const noexcept { return hostBpmValid.load (std::memory_order_relaxed); }
+
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout();
 
